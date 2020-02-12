@@ -155,6 +155,16 @@ def update_functionality(id):
 
   return functionality_schema.jsonify(functionality)
 
+# Delete functionality
+@app.route('/functionality/<id>', methods = ['DELETE'])
+def delete_functionality(id):
+    functionality = Functionality.query.get(id)
+
+    db.session.delete(functionality)
+    db.session.commit()
+
+    return functionality_schema.jsonify(functionality)
+
 # Run Server
 if __name__ == '__main__':
   app.run(host='0.0.0.0', debug=True)
