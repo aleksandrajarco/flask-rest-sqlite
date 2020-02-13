@@ -21,7 +21,7 @@ ma = Marshmallow(app)
 db.create_all()
 # Product Class/Model
 class Product(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
+  id = db.Column(db.Integer, primary_key=True, autoincrement = True)
   name = db.Column(db.String(100), unique=True)
   description = db.Column(db.String(200))
   price = db.Column(db.Float)
@@ -41,7 +41,6 @@ class Functionality(db.Model):
   name = db.Column(db.String(200))
 
   def __init__(self, name, id, product_id):
-    self.id = id
     self.product_id = product_id
     self.name = name
 
@@ -119,10 +118,7 @@ def delete_product(id):
 @app.route('/functionality', methods=['POST'])
 def add_functionality():
   name = request.json['name']
-  id_max = db.session.query(func.max(Functionality.id)).scalar()
-  print(id_max)
   product_id = request.json['product_id']
-  id = id_max +1
   new_functionality = Functionality(name, id, product_id)
 
   db.session.add(new_functionality)
