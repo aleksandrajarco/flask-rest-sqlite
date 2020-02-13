@@ -40,7 +40,7 @@ class Functionality(db.Model):
   product_id = db.Column(db.String(100), ForeignKey('product.id'))
   name = db.Column(db.String(200))
 
-  def __init__(self, name, id, product_id):
+  def __init__(self, name, product_id):
     self.product_id = product_id
     self.name = name
 
@@ -119,7 +119,7 @@ def delete_product(id):
 def add_functionality():
   name = request.json['name']
   product_id = request.json['product_id']
-  new_functionality = Functionality(name, id, product_id)
+  new_functionality = Functionality(name, product_id)
 
   db.session.add(new_functionality)
   db.session.commit()
