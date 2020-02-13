@@ -44,6 +44,24 @@ class Functionality(db.Model):
     self.product_id = product_id
     self.name = name
 
+class Customer(db.Model):
+    id = db.Column(db.Integer, primary_key = True, autoincrement = True)
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(50))
+
+    def __init__(self, name, email):
+      self.name = name
+      self.email = email
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    customer_id = db.Column(db.Integer, db.ForeignKey(Customer.id))
+    amount = db.Column(db.Integer)
+
+    def __init__(self, customer_id, amount):
+      self.customer_id = customer_id
+      self.amount = amount
+
 # Product Schema
 class ProductSchema(ma.Schema):
   class Meta:
@@ -54,12 +72,25 @@ class FunctionalitySchema(ma.Schema):
   class Meta:
     fields = ('id', 'product_id', 'name')
 
+#Customer Schema
+class CustomerSchema(ma.Schema):
+  class Meta:
+    fields = ('id', 'name', 'email')
+
+#Order Schema
+class OrderSchema(ma.Schema):
+  class Meta:
+    fields=('id', 'customer_id', 'amount')
 
 # Init schema
 product_schema = ProductSchema()
 products_schema = ProductSchema(many=True)
 functionality_schema = FunctionalitySchema()
 functionalities_schema = FunctionalitySchema(many=True)
+customer_schema = CustomerSchema()
+customers_schema = CustomerSchema(many = True)
+order_schema = OrderSchema()
+orders_schema = OrderSchema(many = True)
 
 # Create a Product
 @app.route('/product', methods=['POST'])
@@ -162,8 +193,97 @@ def delete_functionality(id):
 
     return functionality_schema.jsonify(functionality)
 
+
+# Add new customer
+@app.route('/customer', methods = ['POST'])
+def add_customer():
+
+  name = request.json['name']
+  email = request.json['email']
+  customer = Customer(name, email)
+
+  db.session.add(customer)
+  db.session.commit()
+  return customer_schema.jsonify(customer)
+
+# Update customer
+@app.route('/customer/<id>', methods= ['PUT'])
+def update_customer(id):
+  customer = Customer.query.get(id)
+  name = request.json['name']
+  email = request.json['email']
+  customer.name = name
+  customer.email = email
+
+  db.session.commit()
+
+  return customer_schema.jsonify(customer)
+
+# Get customer by id
+@app.route('/customer/<id>', methods = ['GET'])
+def get_customer(id):
+  customer = Customer.query.get(id)
+  result = customer_schema.jsonify(customer)
+
+  db.session.commit()
+  return result
+
+# get all customers
+@app.route('/customer', methods=['GET'])
+def get_customers():
+  customers=  Customer.query.all()
+  result = functionalities_schema.dump(customers)
+  return jsonify(result)
+
+
+# delete customer
+@app.route('/customer/<id>', methods = ['DELETE'])
+def delete_customer(id):
+    customer = Customer.query.get(id)
+    db.session.delete(customer)
+    db.session.commit()
+    return customer_schema.jsonify(customer)
+
+
+
+# Add new order
+@app.route('/order', methods = ['POST'])
+def add_order():
+  customer_id = request.json['customer_id']
+  amount = request.json['amount']
+  order = Order(customer_id, amount)
+
+  db.session.add(order)
+  db.session.commit()
+  return order_schema.jsonify(order)
+
+
+#Update order
+@app.route('/order/<id>', methods = ['POST'])
+def upate_order(id):
+
+    order = Order.query.get(id)
+    order.customer_id = request.json['customer_id']
+    order.amount = request.json['amount']
+    db.session.commit()
+    return order_schema.jsonify(order)
+
+
+#get Single order
+@app.route('/order/<id>', methods = ['GET'])
+def get_single_order(id):
+    order = Order.query.get(id)
+    return order_schema.jsonify(order)
+
+# get all orders
+@app.route('/order', methods=['GET'])
+def get_orders():
+  orders=  Order.query.all()
+  result = orders_schema.dump(orders)
+  return jsonify(result)
+
 # Run Server
 if __name__ == '__main__':
+  db.create_all()
   app.run(host='0.0.0.0', debug=True)
   #db.drop_all()
-  db.create_all()
