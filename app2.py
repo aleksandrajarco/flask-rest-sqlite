@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from sqlalchemy import Table, Column, Integer, ForeignKey
 import os
-
+from sqlalchemy.sql.expression import func
 
 
 
@@ -36,7 +36,7 @@ class Product(db.Model):
 
 
 class Functionality(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
+  id = db.Column(db.Integer, primary_key=True, autoincrement = True)
   product_id = db.Column(db.String(100), ForeignKey('product.id'))
   name = db.Column(db.String(200))
 
@@ -117,11 +117,12 @@ def delete_product(id):
 
 # Create a functionality
 @app.route('/functionality', methods=['POST'])
-def add_finctionality():
+def add_functionality():
   name = request.json['name']
-  id = request.json['id']
+  id_max = db.session.query(func.max(Functionality.id)).scalar()
+  print(id_max)
   product_id = request.json['product_id']
-
+  id = id_max +1
   new_functionality = Functionality(name, id, product_id)
 
   db.session.add(new_functionality)
