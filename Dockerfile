@@ -12,4 +12,4 @@ RUN pip3 --no-cache-dir install -r requirements.txt
 EXPOSE 5000
 
 
-CMD [ "python3", "./app.py" ]
+CMD [ "python3", "./app2.py" ]
