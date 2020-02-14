@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from sqlalchemy import Table, Column, Integer, ForeignKey
+from sqlalchemy import Table, Column, Integer, ForeignKey, create_engine
 import os
 from sqlalchemy.sql.expression import func
 
@@ -9,10 +9,11 @@ from sqlalchemy.sql.expression import func
 
 # Init app
 app = Flask(__name__)
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 # Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+url = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+engine = create_engine(url, echo=False)
+app.config['SQLALCHEMY_DATABASE_URI'] = url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Init db
 db = SQLAlchemy(app)
@@ -57,10 +58,12 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     customer_id = db.Column(db.Integer, db.ForeignKey(Customer.id))
     amount = db.Column(db.Integer)
+    product_id = db.Column(db.Integer, db.ForeignKey(Product.id))
 
-    def __init__(self, customer_id, amount):
+    def __init__(self, customer_id, amount, product_id):
       self.customer_id = customer_id
       self.amount = amount
+      self.product_id = product_id
 
 # Product Schema
 class ProductSchema(ma.Schema):
@@ -80,7 +83,7 @@ class CustomerSchema(ma.Schema):
 #Order Schema
 class OrderSchema(ma.Schema):
   class Meta:
-    fields=('id', 'customer_id', 'amount')
+    fields = ('id', 'customer_id', 'amount', 'product_id')
 
 # Init schema
 product_schema = ProductSchema()
@@ -251,8 +254,8 @@ def delete_customer(id):
 def add_order():
   customer_id = request.json['customer_id']
   amount = request.json['amount']
-  order = Order(customer_id, amount)
-
+  product_id = request.json['product_id']
+  order = Order(customer_id, amount, product_id)
   db.session.add(order)
   db.session.commit()
   return order_schema.jsonify(order)
@@ -265,6 +268,7 @@ def upate_order(id):
     order = Order.query.get(id)
     order.customer_id = request.json['customer_id']
     order.amount = request.json['amount']
+    order.product_id = request.json['product_id']
     db.session.commit()
     return order_schema.jsonify(order)
 
@@ -284,6 +288,8 @@ def get_orders():
 
 # Run Server
 if __name__ == '__main__':
+
+  #Order.__table__.drop(engine)
   db.create_all()
   app.run(host='0.0.0.0', debug=True)
-  #db.drop_all()
+
