@@ -1,49 +1,25 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
-from sqlalchemy import Table, Column, Integer, ForeignKey, create_engine
+from flask import Flask
+from models import db
+from schemas import ma
+from routes import register_routes
 import os
-from sqlalchemy.sql.expression import func
 
+def create_app():
+    app = Flask(__name__)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    db.init_app(app)
+    ma.init_app(app)
 
-# Init app
-app = Flask(__name__)
-basedir = os.path.abspath(os.path.dirname(__file__))
-# Database
-url = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
-engine = create_engine(url, echo=False)
-app.config['SQLALCHEMY_DATABASE_URI'] = url
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Init db
-db = SQLAlchemy(app)
-# Init ma
-ma = Marshmallow(app)
-#db.create_all()
-# Product Class/Model
+    with app.app_context():
+        db.create_all()
 
+    register_routes(app)
 
+    return app
 
-
-
-
-# Init schema
-product_schema = ProductSchema()
-products_schema = ProductSchema(many=True)
-functionality_schema = FunctionalitySchema()
-functionalities_schema = FunctionalitySchema(many=True)
-customer_schema = CustomerSchema()
-customers_schema = CustomerSchema(many = True)
-order_schema = OrderSchema()
-orders_schema = OrderSchema(many = True)
-
-
-
-# Run Server
 if __name__ == '__main__':
-
-  #Order.__table__.drop(engine)
-  with app.app_context():
-      db.create_all()
-  app.run(host='0.0.0.0', debug=True)
-
+    app = create_app()
+    app.run(host='0.0.0.0', debug=True)
