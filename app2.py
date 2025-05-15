@@ -19,7 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 # Init ma
 ma = Marshmallow(app)
-db.create_all()
+#db.create_all()
 # Product Class/Model
 class Product(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement = True)
@@ -290,6 +290,7 @@ def get_orders():
 if __name__ == '__main__':
 
   #Order.__table__.drop(engine)
-  db.create_all()
+  with app.app_context():
+      db.create_all()
   app.run(host='0.0.0.0', debug=True)
 
