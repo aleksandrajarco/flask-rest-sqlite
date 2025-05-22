@@ -7,7 +7,7 @@ $ pipenv shell
 $ pipenv install
 
 ./run.sh
-python app2.py
+python run.py
 
 # II. With Docker
 
