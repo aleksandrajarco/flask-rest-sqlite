@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from models import db
 from schemas import ma
 from routes import register_routes
@@ -18,7 +18,21 @@ def create_app():
 
     register_routes(app)
 
+    @app.route('/')
+    def index():
+        return """
+            <h1>Welcome to the Flask API!</h1>
+            <p>Available endpoints:</p>
+            <ul>
+                <li><a href="/product">/product</a></li>
+                <li><a href="/customer">/customer</a></li>
+                <li><a href="/functionality">/functionality</a></li>
+                <li><a href="/order">/order</a></li>
+            </ul>
+            """
+
     return app
+
 
 if __name__ == '__main__':
     app = create_app()
