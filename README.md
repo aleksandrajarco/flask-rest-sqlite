@@ -1,4 +1,3 @@
-a
 # Flask REST SQLite
 
 A simple RESTful API built with Flask and SQLite, demonstrating basic CRUD operations with SQLAlchemy and Marshmallow.
