@@ -28,4 +28,4 @@ COPY . /app
 EXPOSE 5000
 
 # Run the application
-CMD ["python", "app2.py"]
+CMD ["python", "run.py"]
