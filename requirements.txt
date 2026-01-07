@@ -2,4 +2,4 @@ Flask==2.3.3
 Flask-SQLAlchemy==3.1.1
 Flask-Marshmallow==0.15.0
 marshmallow-sqlalchemy==0.29.0
-marshmallow==3.21.1
+marshmallow==3.26.2
